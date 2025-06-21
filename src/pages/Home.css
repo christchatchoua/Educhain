@@ -1,115 +1,167 @@
 /* Root layout */
 .ecm-home-root {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #181c23;
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(to bottom, #1c1f26, #111318);
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
 }
 
 /* Hero Section */
 .ecm-hero {
-  background: #181c23;
-  color: #fff;
+  flex: 1;
   width: 100%;
-  padding: 0;
+  padding: 3rem 1rem;
+  box-sizing: border-box;
 }
+
 .ecm-hero-content {
-  max-width: 900px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 3.5rem 1.5rem 2.5rem 1.5rem;
+  text-align: center;
+}
+
+/* Brand */
+.ecm-brand {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
-.ecm-hero-headline {
-  font-size: 2.3rem;
+
+.ecm-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: white;
+  object-fit: cover;
+}
+
+.ecm-brand-name {
+  font-size: 2.2rem;
   font-weight: 800;
-  margin-bottom: 0.7rem;
-  text-align: center;
-  letter-spacing: -1px;
+  color: #ffe600;
 }
+
+/* Headline/Subheadline */
+.ecm-hero-headline {
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
 .ecm-hero-subheadline {
-  color: #e0e0e0;
-  font-size: 1.15rem;
-  margin-bottom: 2.5rem;
-  font-weight: 500;
-  text-align: center;
-  max-width: 500px;
+  font-size: 1.2rem;
+  color: #ccc;
+  max-width: 650px;
+  margin: 0 auto 3rem;
 }
 
 /* Card Row */
 .ecm-card-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
   justify-content: center;
-  width: 100%;
-  flex-wrap: wrap;
 }
 
-/* Card Styles */
+/* Cards */
 .ecm-card {
   background: #23272f;
-  color: #fff;
-  border-radius: 1.2rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: left;
+  width: 280px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-decoration: none;
-  width: 260px;
-  min-height: 160px;
+  color: #fff;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  padding: 2rem 1.2rem 1.5rem 1.2rem;
-  transition: box-shadow 0.18s, transform 0.18s;
-  margin-bottom: 1.5rem;
-  border: 1px solid #23272f;
 }
+
 .ecm-card:hover {
-  box-shadow: 0 8px 32px rgba(33, 53, 71, 0.18);
-  transform: translateY(-6px) scale(1.03);
-  border: 1.5px solid #ffe600;
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(255, 230, 0, 0.2);
 }
+
+.ecm-card-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+}
+
 .ecm-card-title {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  color: #ffe600;
 }
+
 .ecm-card-desc {
   font-size: 1rem;
-  color: #e0e0e0;
-  font-weight: 400;
+  color: #ccc;
 }
 
 /* Footer */
 .ecm-footer {
-  width: 100%;
   background: #15181e;
-  color: #fff;
-  padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+  padding: 2rem 1rem;
   text-align: center;
-  font-size: 1rem;
-  margin-top: auto;
   border-top: 1px solid #23272f;
 }
-.ecm-footer-copyright {
-  color: #aaa;
+
+.ecm-footer-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.ecm-footer-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffe600;
+}
+
+.ecm-footer-desc {
+  color: #bbb;
+  margin: 0.5rem 0 1.5rem;
   font-size: 0.95rem;
-  margin-top: 0.2rem;
+}
+
+.ecm-footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.ecm-footer-link {
+  color: #ccc;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ecm-footer-link:hover {
+  color: #ffe600;
+}
+
+.ecm-footer-copyright {
+  font-size: 0.85rem;
+  color: #999;
 }
 
 /* Responsive */
-@media (max-width: 900px) {
-  .ecm-card-row {
-    flex-direction: column;
-    gap: 1.2rem;
-    align-items: center;
-  }
+@media (max-width: 768px) {
   .ecm-card {
-    width: 100%;
-    max-width: 350px;
+    width: 90%;
   }
-  .ecm-hero-content {
-    padding: 2.2rem 0.5rem 1.5rem 0.5rem;
+  .ecm-hero-headline {
+    font-size: 2rem;
   }
-} 
+}
