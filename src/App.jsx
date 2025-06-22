@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Issuer from './pages/Issuer';
 import Wallet from './pages/Wallet';
 import Verifier from './pages/Verifier';
+import AuthPage from './auth/AuthPage';
 import './App.css';
 
 const flagIcon = 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Flag_of_Cameroon.svg';
@@ -31,6 +32,7 @@ function AppRoutes() {
         <Route path="/issuer" element={<Issuer />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/verifier" element={<Verifier />} />
+        <Route path="/auth" element={<AuthPage />} />
       </Routes>
     </>
   );

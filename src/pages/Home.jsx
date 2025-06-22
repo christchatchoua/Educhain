@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../services/supabase';
 import './Home.css';
 import logo from '../assets/images/cameroon-flag.png';
 import issuerIcon from '../assets/images/user-icon.svg';
@@ -6,6 +7,25 @@ import walletIcon from '../assets/images/wallet-icon.svg';
 import verifierIcon from '../assets/images/checkmark-icon.svg';
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  // Simple check for authenticated user
+  const isAuthenticated = () => {
+    const user = supabase.auth.getUser();
+    return user && user.id;
+  };
+
+  const handleCardClick = async (role) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      if (role === 'issuer') navigate('/issuer');
+      else if (role === 'wallet') navigate('/wallet');
+      else if (role === 'verifier') navigate('/verifier');
+    } else {
+      navigate('/auth', { state: { intendedRole: role } });
+    }
+  };
+
   return (
     <div className="ecm-home-root">
       {/* Hero Section */}
@@ -20,21 +40,21 @@ export default function Home() {
             EduChain CM allows institutions to issue secure, verifiable academic certificates on the blockchain.
           </p>
           <div className="ecm-card-row">
-            <Link to="/issuer" className="ecm-card">
+            <button className="ecm-card" onClick={() => handleCardClick('issuer')}>
               <img src={issuerIcon} alt="Issuer Icon" className="ecm-card-icon" />
               <div className="ecm-card-title">Issuer</div>
               <div className="ecm-card-desc">Issue digital certificates with cryptographic security.</div>
-            </Link>
-            <Link to="/wallet" className="ecm-card">
+            </button>
+            <button className="ecm-card" onClick={() => handleCardClick('wallet')}>
               <img src={walletIcon} alt="Wallet Icon" className="ecm-card-icon" />
               <div className="ecm-card-title">Wallet</div>
               <div className="ecm-card-desc">Securely manage and share your academic credentials.</div>
-            </Link>
-            <Link to="/verifier" className="ecm-card">
+            </button>
+            <button className="ecm-card" onClick={() => handleCardClick('verifier')}>
               <img src={verifierIcon} alt="Verifier Icon" className="ecm-card-icon" />
               <div className="ecm-card-title">Verifier</div>
               <div className="ecm-card-desc">Verify degrees and academic history instantly.</div>
-            </Link>
+            </button>
           </div>
         </div>
       </section>
