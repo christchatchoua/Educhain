@@ -1,0 +1,468 @@
+/* Verifier Page Styles */
+.verifier-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+/* Verifier Header */
+.verifier-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.header-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.flag-corner {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 0.5rem;
+}
+
+.verifier-title {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  letter-spacing: -1px;
+}
+
+.verifier-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.blockchain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 132, 61, 0.2);
+  color: #00ff88;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.badge-icon {
+  font-size: 1rem;
+}
+
+/* Verifier Content */
+.verifier-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Verification Form */
+.verification-form-container {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 2rem;
+}
+
+.verification-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.form-input {
+  padding: 1rem;
+  border: 2px solid #e1e8ed;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.verify-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.verify-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+}
+
+.verify-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Result Container */
+.result-container {
+  margin-bottom: 2rem;
+}
+
+/* Credential Card (Success Result) */
+.credential-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 2px solid #27ae60;
+  position: relative;
+  overflow: hidden;
+}
+
+.credential-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-logo {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.card-status.valid {
+  background: #27ae60;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-content {
+  margin-bottom: 1.5rem;
+}
+
+.student-name {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.degree-info {
+  margin-bottom: 1rem;
+}
+
+.degree-title {
+  color: #34495e;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.gpa-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gpa-label {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.gpa-value {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: #ecf0f1;
+  padding: 0.25rem 0.75rem;
+  border-radius: 10px;
+}
+
+.issued-date, .hash-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.date-label, .hash-label {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.date-value {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.hash-value {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: 'Courier New', monospace;
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #e1e8ed;
+}
+
+.verification-footer {
+  border-top: 1px solid #e1e8ed;
+  padding-top: 1rem;
+}
+
+.verification-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #27ae60;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Error Card */
+.error-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 2px solid #e74c3c;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.error-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  color: #e74c3c;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.error-message {
+  color: #7f8c8d;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.try-again-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.try-again-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* Sample Hashes */
+.sample-hashes {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sample-title {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.hash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hash-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.hash-text {
+  color: #ffe600;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.hash-desc {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+/* Verifier Footer */
+.verifier-footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.footer-content p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .verifier-container {
+    padding: 1rem;
+  }
+  
+  .verifier-title {
+    font-size: 2rem;
+  }
+  
+  .verification-form-container {
+    padding: 1.5rem;
+  }
+  
+  .credential-card,
+  .error-card {
+    padding: 1.5rem;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .hash-item {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .verifier-title {
+    font-size: 1.8rem;
+  }
+  
+  .verification-form-container {
+    padding: 1rem;
+  }
+  
+  .credential-card,
+  .error-card {
+    padding: 1rem;
+  }
+} 

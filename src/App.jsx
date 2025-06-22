@@ -1,7 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Issuer from './pages/Issuer';
+import Wallet from './pages/Wallet';
+import Verifier from './pages/Verifier';
 import './App.css';
 
 const flagIcon = 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Flag_of_Cameroon.svg';
@@ -14,23 +17,29 @@ function handleImgError(e) {
   e.target.style.display = 'none';
 }
 
-function Wallet() {
-  return <div style={{ padding: '2rem' }}><h2>Wallet Page</h2></div>;
-}
+function AppRoutes() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+  const isIssuerRoute = location.pathname.startsWith('/issuer');
+  const showNavbar = !isHomePage && !isIssuerRoute;
 
-function Verifier() {
-  return <div style={{ padding: '2rem' }}><h2>Verifier Page</h2></div>;
-}
-
-export default function App() {
   return (
-    <Router>
+    <>
+      {showNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/issuer" element={<Issuer />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/verifier" element={<Verifier />} />
       </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 }

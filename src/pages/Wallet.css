@@ -1,0 +1,346 @@
+/* Wallet Page Styles */
+.wallet-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+/* Wallet Header */
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.welcome-section {
+  flex: 1;
+}
+
+.wallet-title {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -1px;
+}
+
+.wallet-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1rem 1.5rem;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.student-avatar {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.student-info .student-name {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.student-info .student-id {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+/* Credentials Section */
+.credentials-section {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.credentials-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.section-title {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.credentials-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Credentials Grid */
+.credentials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Credential Card */
+.credential-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.credential-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-logo {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.card-status {
+  background: #27ae60;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-content {
+  margin-bottom: 2rem;
+}
+
+.student-name {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.degree-info {
+  margin-bottom: 1rem;
+}
+
+.degree-title {
+  color: #34495e;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.gpa-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gpa-label {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.gpa-value {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: #ecf0f1;
+  padding: 0.25rem 0.75rem;
+  border-radius: 10px;
+}
+
+.issued-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-label {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.date-value {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Card Actions */
+.card-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.download-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.hash-btn {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: white;
+}
+
+.hash-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4);
+}
+
+/* Wallet Footer */
+.wallet-footer {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-info {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.footer-info p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .wallet-container {
+    padding: 1rem;
+  }
+  
+  .wallet-header {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .wallet-title {
+    font-size: 2rem;
+  }
+  
+  .credentials-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .credentials-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .card-actions {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+  
+  .footer-info {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-title {
+    font-size: 1.8rem;
+  }
+  
+  .credential-card {
+    padding: 1.5rem;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+} 
