@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 import './Issuer.css';
 
 // Helper to check if a path matches the current route
@@ -13,6 +16,27 @@ const isActive = (path, currentPath) => {
 const IssuerDashboard = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          setProfile(userDoc.data());
+        } else {
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div className="issuer-dashboard">
       {/* Sidebar */}
@@ -79,7 +103,7 @@ const IssuerDashboard = () => {
             <input type="text" placeholder="Search..." />
           </div>
           <div className="user-menu">
-            <span>Welcome, Admin</span>
+            <span>Welcome, {profile && profile.fullName ? profile.fullName : (user ? user.email : 'Admin')}</span>
             <div className="avatar">
               <img src="/src/assets/images/user-icon.svg" alt="User" />
             </div>

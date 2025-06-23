@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../services/firebase';
 import './Wallet.css';
 
 // CredentialCard Component
@@ -36,25 +39,46 @@ function CredentialCard({ studentName, degreeTitle, gpa, issuedDate }) {
 }
 
 export default function Wallet() {
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          setProfile(userDoc.data());
+        } else {
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Mock data for student credentials
   const credentials = [
     {
       id: 1,
-      studentName: "Chris M.",
+      studentName: profile && profile.fullName ? profile.fullName : 'Your Name',
       degreeTitle: "B.Tech Computer Engineering",
       gpa: "3.8",
       issuedDate: "June 15, 2025"
     },
     {
       id: 2,
-      studentName: "Chris M.",
+      studentName: profile && profile.fullName ? profile.fullName : 'Your Name',
       degreeTitle: "M.Sc. Data Science",
       gpa: "3.9",
       issuedDate: "August 20, 2025"
     },
     {
       id: 3,
-      studentName: "Chris M.",
+      studentName: profile && profile.fullName ? profile.fullName : 'Your Name',
       degreeTitle: "Certification in Blockchain Development",
       gpa: "4.0",
       issuedDate: "September 10, 2025"
@@ -69,10 +93,12 @@ export default function Wallet() {
           <p className="wallet-subtitle">Manage and share your academic credentials securely</p>
         </div>
         <div className="avatar-section">
-          <div className="student-avatar">👤</div>
+          <div className="student-avatar">
+            {profile && profile.fullName ? profile.fullName.charAt(0).toUpperCase() : (user && user.email ? user.email.charAt(0).toUpperCase() : '👤')}
+          </div>
           <div className="student-info">
-            <span className="student-name">Chris M.</span>
-            <span className="student-id">STU001</span>
+            <span className="student-name">{profile && profile.fullName ? profile.fullName : (user ? user.email : 'Guest')}</span>
+            <span className="student-id">{user ? user.uid : ''}</span>
           </div>
         </div>
       </div>

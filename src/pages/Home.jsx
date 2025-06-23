@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../services/supabase';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 import './Home.css';
 import logo from '../assets/images/cameroon-flag.png';
 import issuerIcon from '../assets/images/user-icon.svg';
@@ -8,15 +9,17 @@ import verifierIcon from '../assets/images/checkmark-icon.svg';
 
 export default function Home() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
-  // Simple check for authenticated user
-  const isAuthenticated = () => {
-    const user = supabase.auth.getUser();
-    return user && user.id;
-  };
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const handleCardClick = async (role) => {
-    const { data: { user } } = await supabase.auth.getUser();
+  const handleCardClick = (role) => {
     if (user) {
       if (role === 'issuer') navigate('/issuer');
       else if (role === 'wallet') navigate('/wallet');

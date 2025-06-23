@@ -1,0 +1,34 @@
+As a React developer, I need to integrate Cloud Firestore for user profile management into my existing Firebase setup.
+
+[COMPLETED] Firebase integration for authentication and user profile management is now implemented as described below.
+
+My Firebase initialization is located in `src/services/firebase.js`. It currently exports the initialized Firebase app instance as `app`.
+
+**Part 1: Update Firebase Initialization**
+1.  Modify `src/services/firebase.js` to also import and initialize the Cloud Firestore service.
+2.  Export the Firestore database instance (e.g., as `db`) alongside the `app` instance.
+
+**Part 2: Enhance User Sign-Up (SignUpForm)**
+1.  Assume I have an existing `SignUpForm` component that uses `firebase/auth`'s `createUserWithEmailAndPassword` to register users.
+2.  After a user is successfully registered with Firebase Authentication (i.e., inside the `try` block after `createUserWithEmailAndPassword` succeeds), I want to create a new document in my Cloud Firestore database.
+3.  This document should be placed in a collection named `users`.
+4.  The document's ID should be the `uid` of the newly created Firebase Authentication user.
+5.  The document should store at least the user's `email` (from the Authentication user object), and a placeholder `role` field (e.g., "holder").
+6.  Import the Firestore database instance (e.g., `db`) from `src/services/firebase.js`.
+7.  Use `setDoc` from `firebase/firestore` to create the document.
+8.  Include robust error handling (`try...catch`) for both authentication and Firestore operations. Log success/error messages to the console.
+
+**Part 3: Display User Data (Dashboard Component)**
+1.  Create a new functional React component named `Dashboard`.
+2.  This component should be designed to display information about the currently logged-in user.
+3.  It needs to listen for changes in Firebase Authentication's user state (e.g., using `onAuthStateChanged`).
+4.  If a user is logged in, use their `uid` to fetch their corresponding document from the `users` collection in Cloud Firestore.
+5.  Display the user's email (from Auth) and their `role` (from Firestore) on the dashboard.
+6.  Handle cases where no user is logged in or their Firestore document doesn't exist (though it should after signup).
+7.  Import necessary modules from `firebase/auth` and `firebase/firestore`, as well as `db` from `src/services/firebase.js`.
+8.  Use `useEffect` and `useState` for managing user state and fetched data.
+
+Ensure all necessary Firebase SDKs are imported for both Authentication and Firestore operations.
+
+context  
+Educhain is a decentralized identity verification system that enables students, educational institutions, and employers to manage, issue, and verify academic credentials without relying on centralized authorities. The system leverages blockchain technology to create tamper-proof, instantly verifiable digital certificates while giving users complete control over their academic data.

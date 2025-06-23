@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../services/firebase';
 import './Verifier.css';
 
 export default function Verifier() {
   const [credentialHash, setCredentialHash] = useState('');
   const [verificationResult, setVerificationResult] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          setProfile(userDoc.data());
+        } else {
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Mock credential data
   const mockCredentials = [
@@ -70,6 +93,17 @@ export default function Verifier() {
             <span className="badge-icon">🔗</span>
             Blockchain-secured verification
           </div>
+          {user && (
+            <div className="verifier-user-summary">
+              <div className="verifier-avatar">
+                {profile && profile.fullName ? profile.fullName.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
+              </div>
+              <div className="verifier-user-info">
+                <span className="verifier-user-name">{profile && profile.fullName ? profile.fullName : user.email}</span>
+                <span className="verifier-user-role">{profile && profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'Verifier'}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

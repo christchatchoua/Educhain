@@ -1,13 +1,36 @@
 import './Navbar.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { supabase } from '../services/supabase';
+import { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
 
-  const handleNavClick = async (role) => {
-    const { data: { user } } = await supabase.auth.getUser();
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        // Fetch user profile from Firestore
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          setProfile(userDoc.data());
+        } else {
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleNavClick = (role) => {
     if (user) {
       if (role === 'issuer') navigate('/issuer');
       else if (role === 'wallet') navigate('/wallet');
@@ -41,6 +64,16 @@ export default function Navbar() {
         >
           Verifier
         </button>
+        {user && (
+          <div className="navbar-user">
+            <span className="navbar-user-avatar">
+              {profile && profile.fullName ? profile.fullName.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
+            </span>
+            <span className="navbar-user-name">
+              {profile && profile.fullName ? profile.fullName : user.email}
+            </span>
+          </div>
+        )}
       </div>
     </nav>
   );

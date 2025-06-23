@@ -1,8 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 import { Link } from 'react-router-dom';
 import './Issuer.css';
 
 const DashboardHome = () => {
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          setProfile(userDoc.data());
+        } else {
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Mock data - in a real app, this would come from an API
   const stats = [
     { title: 'Total Credentials Issued', value: '1,250', change: '+12%', trend: 'up' },
@@ -21,7 +45,7 @@ const DashboardHome = () => {
   return (
     <div className="dashboard-home">
       <div className="dashboard-header">
-        <h1>Dashboard Overview</h1>
+        <h1>Welcome{profile && profile.fullName ? `, ${profile.fullName}` : user ? `, ${user.email}` : ''}!</h1>
         <Link to="/issuer/issue" className="btn-primary">
           <img src="/src/assets/images/plus-icon.svg" alt="Issue New" />
           Issue New Credential
