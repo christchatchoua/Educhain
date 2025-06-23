@@ -29,6 +29,7 @@ My Firebase initialization is located in `src/services/firebase.js`. It currentl
 8.  Use `useEffect` and `useState` for managing user state and fetched data.
 
 Ensure all necessary Firebase SDKs are imported for both Authentication and Firestore operations.
-
+````
 context  
 Educhain is a decentralized identity verification system that enables students, educational institutions, and employers to manage, issue, and verify academic credentials without relying on centralized authorities. The system leverages blockchain technology to create tamper-proof, instantly verifiable digital certificates while giving users complete control over their academic data.
+```

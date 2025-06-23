@@ -6,6 +6,7 @@ import Issuer from './pages/Issuer';
 import Wallet from './pages/Wallet';
 import Verifier from './pages/Verifier';
 import AuthPage from './auth/AuthPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 const flagIcon = 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Flag_of_Cameroon.svg';
@@ -29,9 +30,9 @@ function AppRoutes() {
       {showNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/issuer" element={<Issuer />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/verifier" element={<Verifier />} />
+        <Route path="/issuer" element={<ProtectedRoute requiredRole="issuer"><Issuer /></ProtectedRoute>} />
+        <Route path="/wallet" element={<ProtectedRoute requiredRole="wallet"><Wallet /></ProtectedRoute>} />
+        <Route path="/verifier" element={<ProtectedRoute requiredRole="verifier"><Verifier /></ProtectedRoute>} />
         <Route path="/auth" element={<AuthPage />} />
       </Routes>
     </>

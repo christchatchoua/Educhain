@@ -28,7 +28,11 @@ export default function AuthPage() {
       setForm((prev) => ({ ...prev, role: location.state.intendedRole }));
       setMode('signup');
     }
-  }, [location.state]);
+    if (location.state && location.state.error) {
+      setMessage({ type: 'error', text: location.state.error });
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
+import ProtectedRoute from '../components/ProtectedRoute';
+import { getAuth, signOut } from 'firebase/auth';
 import './Issuer.css';
+
+function LogoutButton() {
+  const handleLogout = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    window.location.href = '/auth';
+  };
+  return (
+    <button className="logout-btn" onClick={handleLogout} style={{margin:'1rem 0',padding:'0.7rem 1.5rem',background:'#ce1126',color:'#fff',border:'none',borderRadius:'8px',fontWeight:'bold',cursor:'pointer'}}>Logout</button>
+  );
+}
 
 export default function Issuer() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -234,39 +247,44 @@ export default function Issuer() {
   };
 
   return (
-    <div className="issuer-container">
-      <div className="issuer-sidebar">
-        <div className="sidebar-header">
-          <h3>🎓 EduChain CM</h3>
-          <p>Issuer Portal</p>
+    <ProtectedRoute requiredRole="issuer">
+      <div>
+        <LogoutButton />
+        <div className="issuer-container">
+          <div className="issuer-sidebar">
+            <div className="sidebar-header">
+              <h3>🎓 EduChain CM</h3>
+              <p>Issuer Portal</p>
+            </div>
+            <nav className="sidebar-nav">
+              <button
+                className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+                onClick={() => setActiveTab('dashboard')}
+              >
+                <span className="nav-icon">📊</span>
+                Dashboard
+              </button>
+              <button
+                className={`nav-item ${activeTab === 'add-credential' ? 'active' : ''}`}
+                onClick={() => setActiveTab('add-credential')}
+              >
+                <span className="nav-icon">➕</span>
+                Add Credential
+              </button>
+              <button
+                className={`nav-item ${activeTab === 'issued-credentials' ? 'active' : ''}`}
+                onClick={() => setActiveTab('issued-credentials')}
+              >
+                <span className="nav-icon">📋</span>
+                Issued Credentials
+              </button>
+            </nav>
+          </div>
+          <div className="issuer-main">
+            {renderContent()}
+          </div>
         </div>
-        <nav className="sidebar-nav">
-          <button
-            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
-          >
-            <span className="nav-icon">📊</span>
-            Dashboard
-          </button>
-          <button
-            className={`nav-item ${activeTab === 'add-credential' ? 'active' : ''}`}
-            onClick={() => setActiveTab('add-credential')}
-          >
-            <span className="nav-icon">➕</span>
-            Add Credential
-          </button>
-          <button
-            className={`nav-item ${activeTab === 'issued-credentials' ? 'active' : ''}`}
-            onClick={() => setActiveTab('issued-credentials')}
-          >
-            <span className="nav-icon">📋</span>
-            Issued Credentials
-          </button>
-        </nav>
       </div>
-      <div className="issuer-main">
-        {renderContent()}
-      </div>
-    </div>
+    </ProtectedRoute>
   );
 } 

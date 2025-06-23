@@ -1,8 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import ProtectedRoute from '../components/ProtectedRoute';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import './Wallet.css';
+
+function LogoutButton() {
+  const handleLogout = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    window.location.href = '/auth';
+  };
+  return (
+    <button className="logout-btn" onClick={handleLogout} style={{margin:'1rem 0',padding:'0.7rem 1.5rem',background:'#ce1126',color:'#fff',border:'none',borderRadius:'8px',fontWeight:'bold',cursor:'pointer'}}>Logout</button>
+  );
+}
 
 // CredentialCard Component
 function CredentialCard({ studentName, degreeTitle, gpa, issuedDate }) {
@@ -38,7 +50,7 @@ function CredentialCard({ studentName, degreeTitle, gpa, issuedDate }) {
   );
 }
 
-export default function Wallet() {
+function WalletContent() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
 
@@ -131,5 +143,16 @@ export default function Wallet() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Wallet() {
+  return (
+    <ProtectedRoute requiredRole="wallet">
+      <div>
+        <LogoutButton />
+        <WalletContent />
+      </div>
+    </ProtectedRoute>
   );
 } 
