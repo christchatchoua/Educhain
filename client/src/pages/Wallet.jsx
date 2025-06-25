@@ -3,6 +3,8 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { getMyCredentials } from '../services/eduChainContract';
+import { ethers } from 'ethers';
 import './Wallet.css';
 
 function LogoutButton() {
@@ -17,7 +19,8 @@ function LogoutButton() {
 }
 
 // CredentialCard Component
-function CredentialCard({ studentName, degreeTitle, gpa, issuedDate }) {
+function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialId }) {
+  const [showHash, setShowHash] = useState(false);
   return (
     <div className="credential-card">
       <div className="card-header">
@@ -37,13 +40,19 @@ function CredentialCard({ studentName, degreeTitle, gpa, issuedDate }) {
           <span className="date-label">Issued:</span>
           <span className="date-value">{issuedDate}</span>
         </div>
+        {showHash && (
+          <div className="hash-info">
+            <span className="hash-label">Credential Hash:</span>
+            <span className="hash-value">{credentialId}</span>
+          </div>
+        )}
       </div>
       <div className="card-actions">
         <button className="action-btn download-btn">
           📄 Download PDF
         </button>
-        <button className="action-btn hash-btn">
-          🔗 Show Credential Hash
+        <button className="action-btn hash-btn" onClick={() => setShowHash((v) => !v)}>
+          {showHash ? 'Hide Credential Hash' : 'Show Credential Hash'}
         </button>
       </div>
     </div>
@@ -53,6 +62,9 @@ function CredentialCard({ studentName, degreeTitle, gpa, issuedDate }) {
 function WalletContent() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [credentials, setCredentials] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -72,30 +84,26 @@ function WalletContent() {
     return () => unsubscribe();
   }, []);
 
-  // Mock data for student credentials
-  const credentials = [
-    {
-      id: 1,
-      studentName: profile && profile.fullName ? profile.fullName : 'Your Name',
-      degreeTitle: "B.Tech Computer Engineering",
-      gpa: "3.8",
-      issuedDate: "June 15, 2025"
-    },
-    {
-      id: 2,
-      studentName: profile && profile.fullName ? profile.fullName : 'Your Name',
-      degreeTitle: "M.Sc. Data Science",
-      gpa: "3.9",
-      issuedDate: "August 20, 2025"
-    },
-    {
-      id: 3,
-      studentName: profile && profile.fullName ? profile.fullName : 'Your Name',
-      degreeTitle: "Certification in Blockchain Development",
-      gpa: "4.0",
-      issuedDate: "September 10, 2025"
+  // Fetch credentials from smart contract
+  useEffect(() => {
+    async function fetchCredentials() {
+      setLoading(true);
+      setErrorMsg('');
+      try {
+        if (!window.ethereum) throw new Error('MetaMask is not installed');
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const creds = await getMyCredentials(signer);
+        setCredentials(creds);
+      } catch (err) {
+        setErrorMsg(err.message || 'Failed to fetch credentials.');
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
+    fetchCredentials();
+  }, [user]);
 
   return (
     <div className="wallet-container">
@@ -123,17 +131,26 @@ function WalletContent() {
           </div>
         </div>
 
-        <div className="credentials-grid">
-          {credentials.map(credential => (
-            <CredentialCard
-              key={credential.id}
-              studentName={credential.studentName}
-              degreeTitle={credential.degreeTitle}
-              gpa={credential.gpa}
-              issuedDate={credential.issuedDate}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div>Loading credentials...</div>
+        ) : errorMsg ? (
+          <div className="error-message">❌ {errorMsg}</div>
+        ) : credentials.length === 0 ? (
+          <div>No credentials found.</div>
+        ) : (
+          <div className="credentials-grid">
+            {credentials.map((credential, idx) => (
+              <CredentialCard
+                key={credential.credentialId || idx}
+                studentName={profile && profile.fullName ? profile.fullName : 'Your Name'}
+                degreeTitle={credential.degreeTitle}
+                gpa={credential.gpa || '-'}
+                issuedDate={new Date(credential.issueDate * 1000).toLocaleDateString()}
+                credentialId={credential.credentialId}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="wallet-footer">

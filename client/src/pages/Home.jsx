@@ -6,6 +6,7 @@ import logo from '../assets/images/cameroon-flag.png';
 import issuerIcon from '../assets/images/user-icon.svg';
 import walletIcon from '../assets/images/wallet-icon.svg';
 import verifierIcon from '../assets/images/checkmark-icon.svg';
+import gradCapIcon from '../assets/images/university-icon.svg';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -33,10 +34,11 @@ export default function Home() {
     <div className="ecm-home-root">
       {/* Hero Section */}
       <section className="ecm-hero">
+        <div className="ecm-academic-bg"></div>
         <div className="ecm-hero-content">
           <div className="ecm-brand">
             <img src={logo} alt="Cameroon Logo" className="ecm-logo" />
-            <h1 className="ecm-brand-name">EduChain CM</h1>
+            <h1 className="ecm-brand-name">EduChain CM <img src={gradCapIcon} alt="Graduation Cap" className="ecm-gradcap-icon" /></h1>
           </div>
           <h2 className="ecm-hero-headline">Reimagining Trust in Academic Credentials</h2>
           <p className="ecm-hero-subheadline">

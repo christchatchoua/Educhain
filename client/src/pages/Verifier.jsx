@@ -4,6 +4,8 @@ import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import './Verifier.css';
+import { verifyCredential } from '../services/eduChainContract';
+import { ethers } from 'ethers';
 
 function LogoutButton() {
   const handleLogout = async () => {
@@ -41,50 +43,33 @@ export default function Verifier() {
     return () => unsubscribe();
   }, []);
 
-  // Mock credential data
-  const mockCredentials = [
-    {
-      hash: "abc123xyz",
-      studentName: "Chris M.",
-      degreeTitle: "B.Tech Computer Engineering",
-      gpa: "3.8",
-      issuedDate: "June 15, 2025"
-    },
-    {
-      hash: "def456uvw",
-      studentName: "Jane Doe",
-      degreeTitle: "B.Sc Data Science",
-      gpa: "3.7",
-      issuedDate: "May 12, 2025"
-    },
-    {
-      hash: "ghi789rst",
-      studentName: "John Smith",
-      degreeTitle: "M.Sc Artificial Intelligence",
-      gpa: "3.9",
-      issuedDate: "July 20, 2025"
-    }
-  ];
-
-  const handleVerification = (e) => {
+  const handleVerification = async (e) => {
     e.preventDefault();
-    
     if (!credentialHash.trim()) {
       alert('Please enter a credential hash or ID');
       return;
     }
-
     setIsVerifying(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      const foundCredential = mockCredentials.find(
-        cred => cred.hash.toLowerCase() === credentialHash.toLowerCase()
-      );
-      
-      setVerificationResult(foundCredential);
+    setVerificationResult(null);
+    try {
+      if (!window.ethereum) throw new Error('MetaMask is not installed');
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      // Call smart contract
+      const result = await verifyCredential(provider, credentialHash.trim());
+      setVerificationResult({
+        studentName: result.holder,
+        degreeTitle: result.degreeTitle,
+        issuedDate: new Date(result.issueDate * 1000).toLocaleDateString(),
+        hash: credentialHash.trim(),
+        institutionName: result.institutionName,
+        issuer: result.issuer
+      });
+    } catch (err) {
+      setVerificationResult(false);
+    } finally {
       setIsVerifying(false);
-    }, 1000);
+    }
   };
 
   const handleTryAgain = () => {
@@ -162,8 +147,8 @@ export default function Verifier() {
                     <div className="degree-info">
                       <p className="degree-title">{verificationResult.degreeTitle}</p>
                       <div className="gpa-info">
-                        <span className="gpa-label">GPA:</span>
-                        <span className="gpa-value">{verificationResult.gpa}</span>
+                        <span className="gpa-label">Institution:</span>
+                        <span className="gpa-value">{verificationResult.institutionName}</span>
                       </div>
                     </div>
                     <div className="issued-date">
@@ -173,6 +158,10 @@ export default function Verifier() {
                     <div className="hash-info">
                       <span className="hash-label">Hash:</span>
                       <span className="hash-value">{verificationResult.hash}</span>
+                    </div>
+                    <div className="issuer-info">
+                      <span className="issuer-label">Issuer:</span>
+                      <span className="issuer-value">{verificationResult.issuer}</span>
                     </div>
                   </div>
                   <div className="verification-footer">
@@ -205,12 +194,12 @@ export default function Verifier() {
             <div className="sample-hashes">
               <h3 className="sample-title">Sample Hashes for Testing:</h3>
               <div className="hash-list">
-                {mockCredentials.map((cred, index) => (
+                {/* mockCredentials.map((cred, index) => (
                   <div key={index} className="hash-item">
                     <span className="hash-text">{cred.hash}</span>
                     <span className="hash-desc">- {cred.studentName}</span>
                   </div>
-                ))}
+                )) */}
               </div>
             </div>
           </div>

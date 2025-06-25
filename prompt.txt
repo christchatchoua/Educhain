@@ -1,0 +1,144 @@
+Educhain is a decentralized identity verification system that enables students, educational institutions, and employers to manage, issue, and verify academic credentials without relying on centralized authorities. The system leverages blockchain technology to create tamper-proof, instantly verifiable digital certificates while giving users complete control over their academic data.
+
+
+You're now the Smart Contract Engineer & Integrator of the EduChain project.
+
+🎯 Project Summary
+Frontend is built with Vite + React.
+
+Authentication is handled by Firebase, with role-based access:
+
+Issuer (universities): can issue credentials
+
+Holder (students): can receive/view credentials
+
+Verifier (employers): can verify credentials
+
+We're using Hardhat for local blockchain development and ethers.js for web3 integration.
+
+Dependencies already installed:
+
+hardhat, @nomicfoundation/hardhat-toolbox
+
+ethers
+
+We are not using Sepolia or Infura for now — only local blockchain via npx hardhat node.
+
+🛠️ Task Scope — What to Build
+1. ✅ Solidity Smart Contract
+Create the smart contract contracts/contracts/EduChain.sol with these features:
+
+Function for issuers to issue credentials to a student's wallet address
+
+Function for holders to view their own credentials
+
+Function for verifiers to verify the existence + details of a credential
+
+Every credential should have:
+
+Issuer address
+
+Holder address
+
+Degree title (e.g., "BSc in CS")
+
+Institution name
+
+Issue date
+
+Unique ID (like a hash)
+
+Only users with the issuer role (based on the msg.sender address) can issue credentials
+
+Use basic role management with mapping or modifiers in Solidity to restrict function access.
+
+2. ✅ Deployment Script
+Write contracts/scripts/deploy.js to deploy EduChain.sol to the local network (http://127.0.0.1:8545).
+
+3. ✅ Clean up React Mock Data
+In all issuer/wallet/verifier pages, remove any fake/mock/test credential data
+
+Issuer dashboard should show zero credentials initially
+
+Holder dashboard (wallet) should be empty until they receive a credential
+
+Verifier should be able to input a credential hash or ID and check if it exists (after actual issuance)
+
+4. ✅ Frontend Integration with ethers.js + Metamask
+Use ethers.js to connect React to the smart contract
+
+On the frontend:
+
+Issuers can call issueCredential() with wallet address + credential details
+
+Holders can call getMyCredentials() (connected Metamask wallet)
+
+Verifiers can input a credential ID and get status/details using verifyCredential(id)
+
+Automatically increment credential count on successful issuance
+
+5. ✅ Firebase + Firestore for Off-Chain Metadata
+Use Firestore to store supplementary off-chain metadata like:
+
+Credential title (string)
+
+Description
+
+File attachment URL (if any)
+
+Store this under a collection like credentials
+
+Use credential hash or ID from the blockchain as the document ID
+
+Ensure:
+
+Firestore writes are only made after a successful blockchain transaction
+
+Write clean, bug-free Firestore logic
+
+6. ✅ Role-Based Protection in Frontend
+Only allow:
+
+Issuers to access the Issuer dashboard and issue credentials
+
+Holders to access the Wallet dashboard
+
+Verifiers to access the Verifier dashboard
+
+Use the current Firebase login session to determine the user's role
+
+Enforce frontend-level access control (you can assume role is fetched and stored in user context)
+
+🧨 DO NOT:
+DO NOT leave any fake credentials in the codebase
+
+DO NOT generate random test data
+
+DO NOT give access to unauthorized roles
+
+DO NOT crash the app or break existing pages
+
+DO NOT use Sepolia, Infura, or any remote chain
+
+🧼 Final Touches
+Clean UI: Use the existing style system (CSS Modules or Tailwind depending on the project)
+
+Add logout buttons on all dashboards
+
+Show real credential count (dynamically fetched) for each role
+
+Keep smart contract and integration simple but secure (this is for a jury demo, not production)
+
+Once you're done, confirm:
+
+Contract compiles
+
+Contract deploys on localhost
+
+Frontend connects and reads/writes properly
+
+Each role behaves as intended (issuer, holder, verifier)
+
+No mock data or test junk remains
+
+remove the vite + react at the top of the browser page put Educhain Cm WITH SOMETHING COol for showing it is for academic credentials

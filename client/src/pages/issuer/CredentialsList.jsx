@@ -2,50 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Issuer.css';
 
-// Mock data - in a real app, this would come from an API
-const mockCredentials = [
-  {
-    id: 'EC20240001',
-    studentName: 'John Doe',
-    studentEmail: 'john.doe@example.com',
-    type: 'Bachelor of Science',
-    field: 'Computer Science',
-    issueDate: '2024-06-15',
-    expiryDate: '2028-06-15',
-    status: 'active',
-  },
-  {
-    id: 'EC20240002',
-    studentName: 'Jane Smith',
-    studentEmail: 'jane.smith@example.com',
-    type: 'Master of Business Administration',
-    field: 'Business Administration',
-    issueDate: '2024-05-20',
-    expiryDate: '2026-05-20',
-    status: 'active',
-  },
-  {
-    id: 'EC20240003',
-    studentName: 'Alex Johnson',
-    studentEmail: 'alex.j@example.com',
-    type: 'Certificate',
-    field: 'Data Science',
-    issueDate: '2024-04-10',
-    expiryDate: '2025-04-10',
-    status: 'expired',
-  },
-  {
-    id: 'EC20240004',
-    studentName: 'Sarah Williams',
-    studentEmail: 'sarah.w@example.com',
-    type: 'Diploma',
-    field: 'Graphic Design',
-    issueDate: '2024-06-01',
-    expiryDate: '2026-06-01',
-    status: 'revoked',
-  },
-];
-
 const CredentialsList = () => {
   const [credentials, setCredentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,9 +18,8 @@ const CredentialsList = () => {
     const fetchCredentials = async () => {
       setLoading(true);
       try {
-        // In a real app, this would be an API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setCredentials(mockCredentials);
+        // TODO: Fetch credentials from blockchain/Firestore here
+        setCredentials([]); // Start with empty
       } catch (error) {
         console.error('Error fetching credentials:', error);
       } finally {
