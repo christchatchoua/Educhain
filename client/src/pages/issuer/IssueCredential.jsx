@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import './Issuer.css';
 import { db } from '../../services/firebase';
 import { setDoc, doc } from 'firebase/firestore';
-import { issueCredential } from '../../services/eduChainContract';
-import { ethers } from 'ethers';
 
 const IssueCredential = () => {
   const navigate = useNavigate();
@@ -44,46 +42,21 @@ const IssueCredential = () => {
       if (!accounts || accounts.length === 0) {
         throw new Error('No Ethereum accounts found. Please unlock MetaMask and try again.');
       }
-      // Safely initialize ethers Web3Provider
-      let provider;
-      try {
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-      } catch (err) {
-        throw new Error('Failed to initialize Web3 provider.');
-      }
-      // Create signer
-      let signer;
-      try {
-        signer = provider.getSigner();
-      } catch (err) {
-        throw new Error('Failed to get signer from provider.');
-      }
-      const issuerAddress = await signer.getAddress();
+      const issuerAddress = accounts[0];
       const credentialId = crypto.randomUUID();
       const issueDate = Math.floor(Date.now() / 1000); // now, as UNIX timestamp
-      const graduationTimestamp = formData.graduationDate ? Math.floor(new Date(formData.graduationDate).getTime() / 1000) : 0;
-      // Use the signer to connect to the contract and call issueCredential
-      const tx = await issueCredential({
-        signer,
-        holder: formData.studentWallet,
-        degreeTitle: formData.specialty,
-        institutionName: formData.institutionName,
-        issueDate,
-        credentialId
-      });
       // Store in Firestore
       await setDoc(doc(db, 'credentials', credentialId), {
         credentialId,
         studentName: formData.studentName,
-        specialty: formData.specialty,
+        walletAddress: formData.studentWallet,
+        field: formData.specialty,
         level: formData.level,
-        institutionName: formData.institutionName,
+        institution: formData.institutionName,
         GPA: formData.gpa,
         graduationDate: formData.graduationDate,
-        issuer: issuerAddress,
-        holder: formData.studentWallet,
-        issueDate,
-        blockchainTx: tx.hash || '',
+        issuedBy: issuerAddress,
+        timestamp: issueDate,
       });
       setSuccessMsg('Credential issued and saved successfully!');
       setFormData({ studentName: '', studentWallet: '', specialty: '', level: '', institutionName: '', gpa: '', graduationDate: '' });

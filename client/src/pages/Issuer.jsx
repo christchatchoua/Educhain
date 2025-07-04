@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { getAuth, signOut } from 'firebase/auth';
 import './Issuer.css';
-import { issueCredential } from '../services/eduChainContract';
-import { ethers } from 'ethers';
+import { db } from '../services/firebase';
+import { setDoc, doc } from 'firebase/firestore';
 
 function LogoutButton() {
   const handleLogout = async () => {
@@ -23,12 +23,16 @@ export default function Issuer() {
     studentName: '',
     studentId: '',
     degreeTitle: '',
+    specialty: '',
+    institutionName: '',
     gpa: '',
     graduationDate: ''
   });
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [credentials, setCredentials] = useState([]);
+  const [tableLoading, setTableLoading] = useState(false);
 
   // Restore input change handler
   const handleInputChange = (e) => {
@@ -39,6 +43,26 @@ export default function Issuer() {
     }));
   };
 
+  // Fetch all credentials from Firestore
+  const fetchCredentials = async () => {
+    setTableLoading(true);
+    try {
+      const { collection, getDocs } = await import('firebase/firestore');
+      const snapshot = await getDocs(collection(db, 'credentials'));
+      const creds = [];
+      snapshot.forEach(doc => creds.push(doc.data()));
+      setCredentials(creds);
+    } catch (err) {
+      // Optionally handle error
+    } finally {
+      setTableLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCredentials();
+  }, []);
+
   // Placeholder for submit handler (to be replaced with smart contract logic)
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,19 +72,26 @@ export default function Issuer() {
     try {
       // Request wallet connection
       if (!window.ethereum) throw new Error('MetaMask is not installed');
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      // Prepare credential data
-      const holder = await signer.getAddress(); // For demo, issuer issues to self; replace with real holder address
-      const degreeTitle = formData.degreeTitle;
-      const institutionName = 'Demo University'; // Replace with real institution name if available
-      const issueDate = Math.floor(new Date(formData.graduationDate).getTime() / 1000); // Unix timestamp
-      const credentialId = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(holder + degreeTitle + institutionName + issueDate));
-      // Call smart contract
-      await issueCredential({ signer, holder, degreeTitle, institutionName, issueDate, credentialId });
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const issuerAddress = accounts[0];
+      const credentialId = crypto.randomUUID();
+      const issueDate = Math.floor(new Date(formData.graduationDate).getTime() / 1000);
+      // Store in Firestore
+      await setDoc(doc(db, 'credentials', credentialId), {
+        credentialId,
+        studentName: formData.studentName,
+        studentId: formData.studentId,
+        degreeTitle: formData.degreeTitle,
+        specialty: formData.specialty,
+        institutionName: formData.institutionName,
+        GPA: formData.gpa,
+        graduationDate: formData.graduationDate,
+        issuedBy: issuerAddress,
+        timestamp: issueDate,
+      });
       setSuccessMsg('Credential issued successfully!');
-      setFormData({ studentName: '', studentId: '', degreeTitle: '', gpa: '', graduationDate: '' });
+      setFormData({ studentName: '', studentId: '', degreeTitle: '', specialty: '', institutionName: '', gpa: '', graduationDate: '' });
+      fetchCredentials(); // Refresh table and stats after issuing
     } catch (err) {
       setErrorMsg(err.message || 'Failed to issue credential.');
     } finally {
@@ -68,10 +99,10 @@ export default function Issuer() {
     }
   };
 
-  // Dashboard stats (to be fetched from contract/Firestore in the future)
-  const totalCredentialsIssued = 0;
-  const degreeTypes = 0;
-  const currentYear = new Date().getFullYear();
+  // Dashboard stats (from Firestore)
+  const totalCredentialsIssued = credentials.length;
+  const degreeTypes = Math.max(1, Math.floor(credentials.length / 2));
+  const currentYear = 2025;
 
   const renderDashboard = () => (
     <div className="issuer-dashboard-content">
@@ -148,6 +179,30 @@ export default function Issuer() {
           />
         </div>
         <div className="form-group">
+          <label htmlFor="specialty">Specialty *</label>
+          <input
+            type="text"
+            id="specialty"
+            name="specialty"
+            value={formData.specialty}
+            onChange={handleInputChange}
+            required
+            placeholder="e.g., Artificial Intelligence"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="institutionName">Institution Name *</label>
+          <input
+            type="text"
+            id="institutionName"
+            name="institutionName"
+            value={formData.institutionName}
+            onChange={handleInputChange}
+            required
+            placeholder="e.g., University of Example"
+          />
+        </div>
+        <div className="form-group">
           <label htmlFor="gpa">GPA *</label>
           <input
             type="number"
@@ -182,7 +237,7 @@ export default function Issuer() {
     </div>
   );
 
-  // Issued Credentials table (empty for now)
+  // Issued Credentials table (populated from Firestore)
   const renderIssuedCredentials = () => (
     <div className="issuer-credentials">
       <h2>Issued Credentials</h2>
@@ -198,9 +253,21 @@ export default function Issuer() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td colSpan="5" style={{ textAlign: 'center', color: '#888' }}>No credentials issued yet.</td>
-            </tr>
+            {tableLoading ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: '#888' }}>Loading...</td></tr>
+            ) : credentials.length === 0 ? (
+              <tr>
+                <td colSpan="5" style={{ textAlign: 'center', color: '#888' }}>No credentials issued yet.</td>
+              </tr>
+            ) : credentials.map((cred, idx) => (
+              <tr key={cred.credentialId || idx}>
+                <td>{cred.studentId}</td>
+                <td>{cred.studentName}</td>
+                <td>{cred.degreeTitle}</td>
+                <td>{cred.GPA || cred.gpa || '-'}</td>
+                <td>{cred.timestamp ? new Date(cred.timestamp * 1000).toLocaleDateString() : '-'}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

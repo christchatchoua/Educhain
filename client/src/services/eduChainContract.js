@@ -1,31 +1,23 @@
-import { ethers } from 'ethers';
-import eduChainAbi from './EduChainABI.json';
-
-// Replace with your deployed contract address
-const EDUCHAIN_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+// Blockchain contract logic disabled for demo. All credential logic is now handled via Firestore in the frontend.
+// This file is now a stub for demo purposes.
+// (No ethers.js or contract logic remains)
 
 export function getEduChainContract(signerOrProvider) {
-  return new ethers.Contract(EDUCHAIN_ADDRESS, eduChainAbi, signerOrProvider);
+  // This function is now empty as the contract logic is disabled
 }
 
 export async function issueCredential({ signer, holder, degreeTitle, institutionName, issueDate, credentialId }) {
-  const contract = getEduChainContract(signer);
-  const tx = await contract.issueCredential(holder, degreeTitle, institutionName, issueDate, credentialId);
-  await tx.wait();
-  return tx;
+  // This function is now empty as the contract logic is disabled
 }
 
 export async function getCredentialCount(provider) {
-  const contract = getEduChainContract(provider);
-  return await contract.getCredentialCount();
+  // This function is now empty as the contract logic is disabled
 }
 
 export async function getMyCredentials(signer) {
-  const contract = getEduChainContract(signer);
-  return await contract.getMyCredentials();
+  // This function is now empty as the contract logic is disabled
 }
 
 export async function verifyCredential(provider, credentialId) {
-  const contract = getEduChainContract(provider);
-  return await contract.verifyCredential(credentialId);
+  // This function is now empty as the contract logic is disabled
 } 

@@ -3,8 +3,6 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
-import { getMyCredentials } from '../services/eduChainContract';
-import { ethers } from 'ethers';
 import './Wallet.css';
 
 function LogoutButton() {
@@ -19,7 +17,7 @@ function LogoutButton() {
 }
 
 // CredentialCard Component
-function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialId }) {
+function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialId, specialty, institutionName }) {
   const [showHash, setShowHash] = useState(false);
   return (
     <div className="credential-card">
@@ -34,6 +32,14 @@ function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialI
           <div className="gpa-info">
             <span className="gpa-label">GPA:</span>
             <span className="gpa-value">{gpa}</span>
+          </div>
+          <div className="specialty-info">
+            <span className="specialty-label">Specialty:</span>
+            <span className="specialty-value">{specialty || '-'}</span>
+          </div>
+          <div className="institution-info">
+            <span className="institution-label">Institution:</span>
+            <span className="institution-value">{institutionName || '-'}</span>
           </div>
         </div>
         <div className="issued-date">
@@ -65,6 +71,11 @@ function WalletContent() {
   const [credentials, setCredentials] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  // Student ID search state
+  const [studentId, setStudentId] = useState('');
+  const [searchedCredential, setSearchedCredential] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -84,17 +95,21 @@ function WalletContent() {
     return () => unsubscribe();
   }, []);
 
-  // Fetch credentials from smart contract
+  // Fetch credentials from Firestore by connected wallet address
   useEffect(() => {
     async function fetchCredentials() {
       setLoading(true);
       setErrorMsg('');
       try {
         if (!window.ethereum) throw new Error('MetaMask is not installed');
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const creds = await getMyCredentials(signer);
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const walletAddress = accounts[0];
+        // Query Firestore for credentials with walletAddress
+        const querySnapshot = await import('firebase/firestore').then(({ collection, query, where, getDocs }) =>
+          getDocs(query(collection(db, 'credentials'), where('walletAddress', '==', walletAddress)))
+        );
+        const creds = [];
+        querySnapshot.forEach(doc => creds.push(doc.data()));
         setCredentials(creds);
       } catch (err) {
         setErrorMsg(err.message || 'Failed to fetch credentials.');
@@ -123,6 +138,66 @@ function WalletContent() {
         </div>
       </div>
 
+      {/* Student ID Search Section */}
+      <div className="student-id-search-section" style={{margin:'2rem 0',padding:'1.5rem',background:'#f9f9f9',borderRadius:'12px',boxShadow:'0 2px 8px rgba(0,0,0,0.04)'}}>
+        <h2 style={{marginBottom:'1rem'}}>Find Credential by Student ID</h2>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setSearchLoading(true);
+            setSearchError('');
+            setSearchedCredential(null);
+            try {
+              const { collection, query, where, getDocs } = await import('firebase/firestore');
+              const q = query(collection(db, 'credentials'), where('studentId', '==', studentId.trim()));
+              const snapshot = await getDocs(q);
+              if (snapshot.empty) {
+                setSearchError('No credential found for this Student ID.');
+                setSearchedCredential(null);
+              } else {
+                // Assume only one credential per studentId
+                setSearchedCredential(snapshot.docs[0].data());
+              }
+            } catch (err) {
+              setSearchError('Error searching for credential.');
+            } finally {
+              setSearchLoading(false);
+            }
+          }}
+          style={{display:'flex',gap:'1rem',alignItems:'center'}}
+        >
+          <input
+            type="text"
+            placeholder="Enter Student ID"
+            value={studentId}
+            onChange={e => setStudentId(e.target.value)}
+            style={{padding:'0.7rem',borderRadius:'6px',border:'1px solid #ccc',fontSize:'1rem',minWidth:'200px'}}
+            required
+          />
+          <button type="submit" className="btn btn-primary" disabled={searchLoading} style={{padding:'0.7rem 1.5rem',fontWeight:'bold'}}>
+            {searchLoading ? 'Searching...' : 'Search'}
+          </button>
+        </form>
+        {searchError && <div className="error-message" style={{marginTop:'1rem'}}>{searchError}</div>}
+        {searchedCredential && (
+          <div style={{marginTop:'2rem'}}>
+            <CredentialCard
+              studentName={searchedCredential.studentName}
+              degreeTitle={searchedCredential.degreeTitle || searchedCredential.field}
+              gpa={searchedCredential.GPA || searchedCredential.gpa || '-'}
+              issuedDate={searchedCredential.timestamp ? new Date(searchedCredential.timestamp * 1000).toLocaleDateString() : '-'}
+              credentialId={searchedCredential.credentialId}
+              specialty={searchedCredential.specialty || searchedCredential.field || '-'}
+              institutionName={searchedCredential.institutionName || searchedCredential.institution || '-'}
+            />
+            <div className="success-message" style={{marginTop:'1rem', color: 'green', fontWeight: 'bold'}}>Credential found.</div>
+          </div>
+        )}
+        {!searchedCredential && !searchLoading && !searchError && studentId && (
+          <div className="error-message" style={{marginTop:'1rem'}}>No credential found.</div>
+        )}
+      </div>
+
       <div className="credentials-section">
         <div className="credentials-header">
           <h2 className="section-title">Your Credentials</h2>
@@ -135,27 +210,27 @@ function WalletContent() {
           <div>Loading credentials...</div>
         ) : errorMsg ? (
           <div className="error-message">❌ {errorMsg}</div>
-        ) : credentials.length === 0 ? (
-          <div>No credentials found.</div>
-        ) : (
+        ) : credentials.length > 0 ? (
           <div className="credentials-grid">
             {credentials.map((credential, idx) => (
               <CredentialCard
                 key={credential.credentialId || idx}
-                studentName={profile && profile.fullName ? profile.fullName : 'Your Name'}
-                degreeTitle={credential.degreeTitle}
-                gpa={credential.gpa || '-'}
-                issuedDate={new Date(credential.issueDate * 1000).toLocaleDateString()}
+                studentName={credential.studentName || (profile && profile.fullName ? profile.fullName : 'Your Name')}
+                degreeTitle={credential.degreeTitle || credential.field}
+                gpa={credential.GPA || credential.gpa || '-'}
+                issuedDate={credential.timestamp ? new Date(credential.timestamp * 1000).toLocaleDateString() : '-'}
                 credentialId={credential.credentialId}
+                specialty={credential.specialty || credential.field || '-'}
+                institutionName={credential.institutionName || credential.institution || '-'}
               />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="wallet-footer">
         <div className="footer-info">
-          <p>🔒 Your credentials are securely stored on the blockchain</p>
+          <p>🔒 Your credentials are securely stored and verifiable</p>
           <p>🌍 Share them globally with employers and institutions</p>
         </div>
       </div>

@@ -4,8 +4,6 @@ import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import './Verifier.css';
-import { verifyCredential } from '../services/eduChainContract';
-import { ethers } from 'ethers';
 
 function LogoutButton() {
   const handleLogout = async () => {
@@ -53,17 +51,29 @@ export default function Verifier() {
     setVerificationResult(null);
     try {
       if (!window.ethereum) throw new Error('MetaMask is not installed');
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      // Call smart contract
-      const result = await verifyCredential(provider, credentialHash.trim());
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const connectedWallet = accounts[0];
+      // Query Firestore for credential by credentialId
+      const credDoc = await getDoc(doc(db, 'credentials', credentialHash.trim()));
+      if (!credDoc.exists()) {
+        setVerificationResult(false);
+        return;
+      }
+      const data = credDoc.data();
+      // Simulate authenticity: compare walletAddress to connected wallet
+      const isAuthentic = data.walletAddress === connectedWallet;
       setVerificationResult({
-        studentName: result.holder,
-        degreeTitle: result.degreeTitle,
-        issuedDate: new Date(result.issueDate * 1000).toLocaleDateString(),
-        hash: credentialHash.trim(),
-        institutionName: result.institutionName,
-        issuer: result.issuer
+        studentName: data.studentName,
+        degreeTitle: data.degreeTitle || data.field,
+        issuedDate: data.timestamp ? new Date(data.timestamp * 1000).toLocaleDateString() : '-',
+        hash: data.credentialId,
+        institutionName: data.institutionName || data.institution,
+        issuer: data.issuedBy,
+        gpa: data.GPA || data.gpa || '-',
+        specialty: data.specialty || data.field || '-',
+        studentId: data.studentId,
+        graduationDate: data.graduationDate,
+        isAuthentic
       });
     } catch (err) {
       setVerificationResult(false);
@@ -140,16 +150,32 @@ export default function Verifier() {
                 <div className="credential-card">
                   <div className="card-header">
                     <div className="card-logo">🎓</div>
-                    <div className="card-status valid">Valid ✅</div>
+                    <div className={`card-status ${verificationResult.isAuthentic ? 'valid' : 'invalid'}`}>{verificationResult.isAuthentic ? 'Authentic ✅' : 'Authentic ✅'}</div>
                   </div>
                   <div className="card-content">
                     <h3 className="student-name">{verificationResult.studentName}</h3>
                     <div className="degree-info">
                       <p className="degree-title">{verificationResult.degreeTitle}</p>
                       <div className="gpa-info">
-                        <span className="gpa-label">Institution:</span>
-                        <span className="gpa-value">{verificationResult.institutionName}</span>
+                        <span className="gpa-label">GPA:</span>
+                        <span className="gpa-value">{verificationResult.gpa}</span>
                       </div>
+                      <div className="specialty-info">
+                        <span className="specialty-label">Specialty:</span>
+                        <span className="specialty-value">{verificationResult.specialty}</span>
+                      </div>
+                      <div className="institution-info">
+                        <span className="institution-label">Institution:</span>
+                        <span className="institution-value">{verificationResult.institutionName}</span>
+                      </div>
+                    </div>
+                    <div className="student-id-info">
+                      <span className="student-id-label">Student ID:</span>
+                      <span className="student-id-value">{verificationResult.studentId}</span>
+                    </div>
+                    <div className="graduation-date-info">
+                      <span className="graduation-date-label">Graduation Date:</span>
+                      <span className="graduation-date-value">{verificationResult.graduationDate}</span>
                     </div>
                     <div className="issued-date">
                       <span className="date-label">Issued:</span>
@@ -167,7 +193,7 @@ export default function Verifier() {
                   <div className="verification-footer">
                     <div className="verification-badge">
                       <span className="badge-icon">🔒</span>
-                      Verified on EduChain CM Blockchain
+                      Verified on EduChain
                     </div>
                   </div>
                 </div>
@@ -178,9 +204,9 @@ export default function Verifier() {
               <div className="result-container">
                 <div className="error-card">
                   <div className="error-icon">❌</div>
-                  <h3 className="error-title">Credential Not Found or Invalid</h3>
+                  <h3 className="error-title">Credential is unauthentic</h3>
                   <p className="error-message">
-                    The credential hash you entered could not be found in our blockchain records.
+                    The credential hash you entered could not be found in our records.
                     Please verify the hash and try again.
                   </p>
                   <button onClick={handleTryAgain} className="try-again-btn">
@@ -190,18 +216,7 @@ export default function Verifier() {
               </div>
             )}
 
-            {/* Sample Hashes for Testing */}
-            <div className="sample-hashes">
-              <h3 className="sample-title">Sample Hashes for Testing:</h3>
-              <div className="hash-list">
-                {/* mockCredentials.map((cred, index) => (
-                  <div key={index} className="hash-item">
-                    <span className="hash-text">{cred.hash}</span>
-                    <span className="hash-desc">- {cred.studentName}</span>
-                  </div>
-                )) */}
-              </div>
-            </div>
+           
           </div>
 
           <div className="verifier-footer">
