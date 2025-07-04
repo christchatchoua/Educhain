@@ -1,41 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Issuer.css';
+import { db } from '../../services/firebase';
+import { setDoc, doc } from 'firebase/firestore';
+import { issueCredential } from '../../services/eduChainContract';
+import { ethers } from 'ethers';
 
 const IssueCredential = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    credentialType: 'degree',
     studentName: '',
-    studentEmail: '',
-    studentId: '',
-    program: '',
-    fieldOfStudy: '',
-    issueDate: new Date().toISOString().split('T')[0],
-    expiryDate: '',
-    description: '',
-    additionalFields: []
+    studentWallet: '',
+    specialty: '',
+    level: '',
+    institutionName: '',
+    gpa: '',
+    graduationDate: '',
   });
-
-  const credentialTypes = [
-    { value: 'degree', label: 'Degree' },
-    { value: 'diploma', label: 'Diploma' },
-    { value: 'certificate', label: 'Certificate' },
-    { value: 'transcript', label: 'Transcript' },
-    { value: 'other', label: 'Other' },
-  ];
-
-  const programs = [
-    'Computer Science',
-    'Business Administration',
-    'Engineering',
-    'Medicine',
-    'Law',
-    'Arts',
-    'Sciences',
-    'Other'
-  ];
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,49 +29,66 @@ const IssueCredential = () => {
     }));
   };
 
-  const handleAddField = () => {
-    setFormData(prev => ({
-      ...prev,
-      additionalFields: [
-        ...prev.additionalFields,
-        { name: '', value: '' }
-      ]
-    }));
-  };
-
-  const handleRemoveField = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      additionalFields: prev.additionalFields.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleAdditionalFieldChange = (index, field, value) => {
-    const updatedFields = [...formData.additionalFields];
-    updatedFields[index] = { ...updatedFields[index], [field]: value };
-    setFormData(prev => ({
-      ...prev,
-      additionalFields: updatedFields
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+    setErrorMsg('');
+    setSuccessMsg('');
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real app, this would send the data to your backend/blockchain
-      console.log('Issuing credential with data:', formData);
-      
-      // Show success message and redirect
-      alert('Credential issued successfully!');
-      navigate('/issuer/credentials');
-    } catch (error) {
-      console.error('Error issuing credential:', error);
-      alert('Failed to issue credential. Please try again.');
+      // Check for MetaMask
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('MetaMask is not installed. Please install MetaMask and refresh the page.');
+      }
+      // Prompt MetaMask connection
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No Ethereum accounts found. Please unlock MetaMask and try again.');
+      }
+      // Safely initialize ethers Web3Provider
+      let provider;
+      try {
+        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+      } catch (err) {
+        throw new Error('Failed to initialize Web3 provider.');
+      }
+      // Create signer
+      let signer;
+      try {
+        signer = provider.getSigner();
+      } catch (err) {
+        throw new Error('Failed to get signer from provider.');
+      }
+      const issuerAddress = await signer.getAddress();
+      const credentialId = crypto.randomUUID();
+      const issueDate = Math.floor(Date.now() / 1000); // now, as UNIX timestamp
+      const graduationTimestamp = formData.graduationDate ? Math.floor(new Date(formData.graduationDate).getTime() / 1000) : 0;
+      // Use the signer to connect to the contract and call issueCredential
+      const tx = await issueCredential({
+        signer,
+        holder: formData.studentWallet,
+        degreeTitle: formData.specialty,
+        institutionName: formData.institutionName,
+        issueDate,
+        credentialId
+      });
+      // Store in Firestore
+      await setDoc(doc(db, 'credentials', credentialId), {
+        credentialId,
+        studentName: formData.studentName,
+        specialty: formData.specialty,
+        level: formData.level,
+        institutionName: formData.institutionName,
+        GPA: formData.gpa,
+        graduationDate: formData.graduationDate,
+        issuer: issuerAddress,
+        holder: formData.studentWallet,
+        issueDate,
+        blockchainTx: tx.hash || '',
+      });
+      setSuccessMsg('Credential issued and saved successfully!');
+      setFormData({ studentName: '', studentWallet: '', specialty: '', level: '', institutionName: '', gpa: '', graduationDate: '' });
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to issue credential.');
     } finally {
       setIsSubmitting(false);
     }
@@ -105,185 +106,50 @@ const IssueCredential = () => {
           <h3>Credential Information</h3>
           <div className="form-row">
             <div className="form-group">
-              <label>Credential Type <span className="required">*</span></label>
-              <select
-                name="credentialType"
-                value={formData.credentialType}
-                onChange={handleChange}
-                required
-              >
-                {credentialTypes.map(type => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
+              <label>Student Name <span className="required">*</span></label>
+              <input type="text" name="studentName" value={formData.studentName} onChange={handleChange} required />
             </div>
-            
             <div className="form-group">
-              <label>Issue Date <span className="required">*</span></label>
-              <input
-                type="date"
-                name="issueDate"
-                value={formData.issueDate}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Expiry Date (Optional)</label>
-              <input
-                type="date"
-                name="expiryDate"
-                value={formData.expiryDate}
-                onChange={handleChange}
-                min={formData.issueDate}
-              />
+              <label>Student Wallet Address <span className="required">*</span></label>
+              <input type="text" name="studentWallet" value={formData.studentWallet} onChange={handleChange} required />
             </div>
           </div>
-        </div>
-        
-        <div className="form-section">
-          <h3>Student Information</h3>
           <div className="form-row">
             <div className="form-group">
-              <label>Full Name <span className="required">*</span></label>
-              <input
-                type="text"
-                name="studentName"
-                value={formData.studentName}
-                onChange={handleChange}
-                placeholder="John Doe"
-                required
-              />
+              <label>Specialty <span className="required">*</span></label>
+              <input type="text" name="specialty" value={formData.specialty} onChange={handleChange} required />
             </div>
-            
             <div className="form-group">
-              <label>Email Address <span className="required">*</span></label>
-              <input
-                type="email"
-                name="studentEmail"
-                value={formData.studentEmail}
-                onChange={handleChange}
-                placeholder="student@example.com"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Student ID</label>
-              <input
-                type="text"
-                name="studentId"
-                value={formData.studentId}
-                onChange={handleChange}
-                placeholder="Enter student ID"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div className="form-section">
-          <h3>Academic Information</h3>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Program <span className="required">*</span></label>
-              <select
-                name="program"
-                value={formData.program}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a program</option>
-                {programs.map(program => (
-                  <option key={program} value={program}>
-                    {program}
-                  </option>
-                ))}
+              <label>Level <span className="required">*</span></label>
+              <select name="level" value={formData.level} onChange={handleChange} required>
+                <option value="">Select Level</option>
+                <option value="Bachelor">Bachelor</option>
+                <option value="Master">Master</option>
+                <option value="PhD">PhD</option>
+                <option value="Diploma">Diploma</option>
+                <option value="Certificate">Certificate</option>
               </select>
             </div>
-            
+          </div>
+          <div className="form-row">
             <div className="form-group">
-              <label>Field of Study <span className="required">*</span></label>
-              <input
-                type="text"
-                name="fieldOfStudy"
-                value={formData.fieldOfStudy}
-                onChange={handleChange}
-                placeholder="e.g., Computer Science, Business Administration"
-                required
-              />
+              <label>Institution Name <span className="required">*</span></label>
+              <input type="text" name="institutionName" value={formData.institutionName} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>GPA (optional)</label>
+              <input type="text" name="gpa" value={formData.gpa} onChange={handleChange} />
             </div>
           </div>
-          
-          <div className="form-group">
-            <label>Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Enter a brief description of this credential"
-              rows="3"
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label>Graduation Date <span className="required">*</span></label>
+              <input type="date" name="graduationDate" value={formData.graduationDate} onChange={handleChange} required />
+            </div>
           </div>
         </div>
-        
-        <div className="form-section">
-          <div className="section-header">
-            <h3>Additional Fields</h3>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={handleAddField}
-            >
-              + Add Field
-            </button>
-          </div>
-          
-          {formData.additionalFields.length > 0 ? (
-            <div className="additional-fields">
-              {formData.additionalFields.map((field, index) => (
-                <div key={index} className="form-row align-items-center">
-                  <div className="form-group">
-                    <input
-                      type="text"
-                      placeholder="Field name"
-                      value={field.name}
-                      onChange={(e) => handleAdditionalFieldChange(index, 'name', e.target.value)}
-                      className="form-control"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <input
-                      type="text"
-                      placeholder="Value"
-                      value={field.value}
-                      onChange={(e) => handleAdditionalFieldChange(index, 'value', e.target.value)}
-                      className="form-control"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-icon btn-icon-danger"
-                    onClick={() => handleRemoveField(index)}
-                    title="Remove field"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <p>No additional fields added yet. Click "Add Field" to include custom information.</p>
-            </div>
-          )}
-        </div>
-        
+        {errorMsg && <div className="error-message">{errorMsg}</div>}
+        {successMsg && <div className="success-message">{successMsg}</div>}
         <div className="form-actions">
           <button
             type="button"
