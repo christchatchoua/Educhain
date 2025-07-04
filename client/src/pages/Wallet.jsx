@@ -17,7 +17,7 @@ function LogoutButton() {
 }
 
 // CredentialCard Component
-function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialId, specialty, institutionName }) {
+function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialId, specialty, institutionName, studentId, graduationDate, issuer }) {
   const [showHash, setShowHash] = useState(false);
   return (
     <div className="credential-card">
@@ -42,6 +42,14 @@ function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialI
             <span className="institution-value">{institutionName || '-'}</span>
           </div>
         </div>
+        <div className="student-id-info">
+          <span className="student-id-label">Student ID:</span>
+          <span className="student-id-value">{studentId}</span>
+        </div>
+        <div className="graduation-date-info">
+          <span className="graduation-date-label">Graduation Date:</span>
+          <span className="graduation-date-value">{graduationDate}</span>
+        </div>
         <div className="issued-date">
           <span className="date-label">Issued:</span>
           <span className="date-value">{issuedDate}</span>
@@ -52,6 +60,10 @@ function CredentialCard({ studentName, degreeTitle, gpa, issuedDate, credentialI
             <span className="hash-value">{credentialId}</span>
           </div>
         )}
+        <div className="issuer-info">
+          <span className="issuer-label">Issuer:</span>
+          <span className="issuer-value">{issuer}</span>
+        </div>
       </div>
       <div className="card-actions">
         <button className="action-btn download-btn">
@@ -189,6 +201,9 @@ function WalletContent() {
               credentialId={searchedCredential.credentialId}
               specialty={searchedCredential.specialty || searchedCredential.field || '-'}
               institutionName={searchedCredential.institutionName || searchedCredential.institution || '-'}
+              studentId={searchedCredential.studentId}
+              graduationDate={searchedCredential.graduationDate}
+              issuer={searchedCredential.issuedBy}
             />
             <div className="success-message" style={{marginTop:'1rem', color: 'green', fontWeight: 'bold'}}>Credential found.</div>
           </div>
@@ -222,6 +237,9 @@ function WalletContent() {
                 credentialId={credential.credentialId}
                 specialty={credential.specialty || credential.field || '-'}
                 institutionName={credential.institutionName || credential.institution || '-'}
+                studentId={credential.studentId}
+                graduationDate={credential.graduationDate}
+                issuer={credential.issuedBy}
               />
             ))}
           </div>
